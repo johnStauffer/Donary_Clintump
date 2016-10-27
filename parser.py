@@ -4,6 +4,7 @@ from textblob import TextBlob as tb
 import matplotlib.pyplot as plt
 import pandas
 
+
 # File for response
 tweets_data_path = 'data/twitter_data.txt'
 columns = 5
@@ -38,6 +39,8 @@ def make_autopct(values):
     return my_autopct
 
 
+print("Parsing...")
+
 # create DataFrame to simplify manipulation
 tweets = pandas.DataFrame()
 
@@ -59,7 +62,7 @@ tweets['trump2016_tweets'] = list(
 tweets['votetrump_tweets'] = list(
     map(lambda tweet: tweet['text'] if word_in_text('#votetrump', tweet['text']) else None, tweets_data))
 
-# Sentiment by hashtag
+# Sentiment by hashtag, maps sentiment if tweet exists and sentiment is meaningful
 tweets['feelthebern_sentiment'] = list(
     map(lambda text: tb(text).sentiment.polarity if text != None and tb(text).sentiment.polarity != 0 else None,
         tweets['feelthebern_tweets']))
@@ -78,8 +81,9 @@ tweets['trump2016_sentiment'] = list(
 
 tweets['votetrump_sentiment'] = list(
     map(lambda text: tb(text).sentiment.polarity if text != None and tb(text).sentiment.polarity != 0 else None,
-        tweets['trump2016_tweets']))
+        tweets['votetrump_tweets']))
 
+# Make Dataframe data into list for matplot.. //TODO could skip putting sentiments into dataframe collumns
 feelthebern_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['imwithher_sentiment']))
 imwithher_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['imwithher_sentiment']))
 hillary2016_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['hillary2016_sentiment']))
@@ -109,6 +113,12 @@ plt.pie(tweets_by_hashtag, explode=explode, labels=hashtags, colors=colors,
 plt.axis('equal')
 plt.show()
 
+# Creating box plot for sentiment analysis
+labels = ['#feelthebern','#imwithher', '#hillary2016', '#trump2016', '#votetrump']
+data = [feelthebern_sentiment, imwithher_sentiment, hillary2016_sentiment, trump2016_sentiment, votetrump_sentiment]
+plt.boxplot(data, labels=labels)
+plt.show()
+
 # creating chart of location
 tweets_by_location = tweets['country'].value_counts()
 
@@ -118,7 +128,7 @@ ax.tick_params(axis='y', labelsize=10)
 ax.set_xlabel('Location', fontsize=15)
 ax.set_ylabel('Number of tweets', fontsize=15)
 ax.set_title('Top 5 locations', fontsize=15, fontweight='bold')
-tweets_by_location[:columns].plot(ax=ax, kind='bar', color='red')
+tweets_by_location[:columns].plot(ax=ax, kind='bar', color='red', fontsize=15)
 plt.show()
 
 input("Press enter to close program")
