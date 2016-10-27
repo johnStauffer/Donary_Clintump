@@ -1,8 +1,8 @@
 import json
-import pandas
 import re
-import matplotlib.pyplot as plt
 from textblob import TextBlob as tb
+import matplotlib.pyplot as plt
+import pandas
 
 # File for response
 tweets_data_path = 'data/twitter_data.txt'
@@ -47,6 +47,45 @@ tweets['country'] = list(
 tweets['lang'] = list(map(lambda tweet: tweet['lang'], tweets_data))
 tweets['text'] = list(map(lambda tweet: tweet['text'], tweets_data))
 
+# Tweet text by hashtag
+tweets['feelthebern_tweets'] = list(
+    map(lambda tweet: tweet['text'] if word_in_text('#feelthebern', tweet['text']) else None, tweets_data))
+tweets['imwithher_tweets'] = list(
+    map(lambda tweet: tweet['text'] if word_in_text('#imwithher', tweet['text']) else None, tweets_data))
+tweets['hillary2016_tweets'] = list(
+    map(lambda tweet: tweet['text'] if word_in_text('#hillary2016', tweet['text']) else None, tweets_data))
+tweets['trump2016_tweets'] = list(
+    map(lambda tweet: tweet['text'] if word_in_text('#trump2016', tweet['text']) else None, tweets_data))
+tweets['votetrump_tweets'] = list(
+    map(lambda tweet: tweet['text'] if word_in_text('#votetrump', tweet['text']) else None, tweets_data))
+
+# Sentiment by hashtag
+tweets['feelthebern_sentiment'] = list(
+    map(lambda text: tb(text).sentiment.polarity if text != None and tb(text).sentiment.polarity != 0 else None,
+        tweets['feelthebern_tweets']))
+
+tweets['imwithher_sentiment'] = list(
+    map(lambda text: tb(text).sentiment.polarity if text != None and tb(text).sentiment.polarity != 0 else None,
+        tweets['imwithher_tweets']))
+
+tweets['hillary2016_sentiment'] = list(
+    map(lambda text: tb(text).sentiment.polarity if text != None and tb(text).sentiment.polarity != 0 else None,
+        tweets['hillary2016_tweets']))
+
+tweets['trump2016_sentiment'] = list(
+    map(lambda text: tb(text).sentiment.polarity if text != None and tb(text).sentiment.polarity != 0 else None,
+        tweets['trump2016_tweets']))
+
+tweets['votetrump_sentiment'] = list(
+    map(lambda text: tb(text).sentiment.polarity if text != None and tb(text).sentiment.polarity != 0 else None,
+        tweets['trump2016_tweets']))
+
+feelthebern_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['imwithher_sentiment']))
+imwithher_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['imwithher_sentiment']))
+hillary2016_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['hillary2016_sentiment']))
+trump2016_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['trump2016_sentiment']))
+votetrump_sentiment = list(filter(lambda sentiment: sentiment > -1, tweets['votetrump_sentiment']))
+
 tweets['feelthebern'] = tweets['text'].apply(lambda tweet: word_in_text('#feelthebern', tweet))
 tweets['imwithher'] = tweets['text'].apply(lambda tweet: word_in_text('#imwithher', tweet))
 tweets['hillary2016'] = tweets['text'].apply(lambda tweet: word_in_text('#hillary2016', tweet))
@@ -80,7 +119,6 @@ ax.set_xlabel('Location', fontsize=15)
 ax.set_ylabel('Number of tweets', fontsize=15)
 ax.set_title('Top 5 locations', fontsize=15, fontweight='bold')
 tweets_by_location[:columns].plot(ax=ax, kind='bar', color='red')
-
 plt.show()
 
 input("Press enter to close program")

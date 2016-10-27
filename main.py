@@ -13,9 +13,8 @@ consumer_secret = "Ckf5ScaUVkz8QtHr1AD5r9HAkXnhm4ED9AsMBy52DOgXiV5jEe"
 filter_keys = ['#imwithher', 'hillary2016', 'trump2016', '#votetrump', '#feelthebern']
 
 # Setting up file for tweets to be stored
-twitter_data_path = 'data/twitter_data_2.txt'
+twitter_data_path = 'data/twitter_data.txt'
 twitter_data_store = open(twitter_data_path, 'a+')
-
 
 # Colors for coloring StdOut output
 class bcolors:
@@ -25,7 +24,7 @@ class bcolors:
     ENDC = '\033[0m'
 
 
-# Print to StdOut
+# Print tweets to text file
 class StdOutListener(StreamListener):
     def __init__(self):
         self.count = 0
@@ -52,5 +51,5 @@ if __name__ == '__main__':
     stream = Stream(auth, l)
 
     # Filter stream of tweets with list of keywords
-    print('Streaming...')
+    print(bcolors.YELLOW+'Streaming...'+bcolors.ENDC)
     stream.filter(track=filter_keys)
