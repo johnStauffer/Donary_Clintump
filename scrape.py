@@ -7,6 +7,7 @@ class TweetScraperService(object):
     def scrape_file(self, file_path):
         """deserialize file of json tweets and return list<map> with relevant fields
 
+        :rtype: list
         :param file_path: filepath to file of json tweets
         :return: tweet_list: list of tweet maps with relevant fields. If file cannot be opened return None
         """
@@ -14,8 +15,7 @@ class TweetScraperService(object):
             """open file specified in file_path """
             file_lines = self.__open_file(file_path)
         except IOError as io:
-            """If file cannot be opened, log warning and return None"""
-            log.warning('Could not open file: {}'.format(io))
+            """If file cannot be opened return None"""
             return None
         """serialize list of lines to a list of tweet maps """
         tweet_list = self.scrape_tweet_lines(file_lines)
@@ -42,6 +42,7 @@ class TweetScraperService(object):
     def map_tweet(self, full_tweet_map):
         """process a tweet tuple and map relevant fields
 
+        :rtype map
         :param full_tweet_map: full tuple loaded from json of tweet
         :return: map of relevant tweet fields
         """
@@ -61,6 +62,7 @@ class TweetScraperService(object):
     def __open_file(self, file_path):
         """ Open a file given a file path and return lines in file as a list
 
+        :rtype: list
         :param file_path: path of file to be opened
         :return: list of all lines contained in the file specified by file_path
         :except: IOError: if file_path is incorrect or file cannot be opened
@@ -72,11 +74,12 @@ class TweetScraperService(object):
             file = raw_file.readlines()
             return file
         except IOError as io:
-            return io
+            log.warning("Could not open {}\n {}".format(file_path, type(io)))
+            raise io
 
 
 if __name__ == '__main__':
     file_path = 'data/twitter_data.txt'
     scraper_service = TweetScraperService()
-    scraper_service.scrape_file(file_path)
-
+    tweet_list = scraper_service.scrape_file(file_path)
+    print(tweet_list)
