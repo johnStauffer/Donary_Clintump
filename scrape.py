@@ -1,9 +1,13 @@
 import json
 import datetime as dt
 import logging as log
+from datahandler import TwitterDataAccessor
 
 
 class TweetScraperService(object):
+    def __init__(self):
+        self.tda = TwitterDataAccessor()
+
     def scrape_file(self, file_path):
         """deserialize file of json tweets and return list<map> with relevant fields
 
@@ -36,8 +40,13 @@ class TweetScraperService(object):
             """deserialize json to python tuple"""
             tweet = json.loads(line)
             """strip relevant fields and make map"""
-            tweets_map_list.append(self.map_tweet(tweet))
+            mapped_tweet = self.map_tweet(tweet)
+            tweets_map_list.append(mapped_tweet)
+            rs = self.tda.create_tweet_record(mapped_tweet['text'], mapped_tweet['create_datetime'], mapped_tweet['user_id'],
+                                         mapped_tweet['favorites'], mapped_tweet['retweet_count'], mapped_tweet['user_name'],
+                                         mapped_tweet['screen_name'], mapped_tweet['location'])
         return tweets_map_list
+
 
     def map_tweet(self, full_tweet_map):
         """process a tweet tuple and map relevant fields
@@ -52,9 +61,14 @@ class TweetScraperService(object):
         try:
             """map relevant fields"""
             tweet_map['text'] = full_tweet_map['text']
-            tweet_map['location'] = full_tweet_map['user']['location']
             tweet_map['create_datetime'] = datetime
-            tweet_map['lang'] = full_tweet_map['lang']
+            tweet_map['user_id'] = full_tweet_map['user']['id']
+            tweet_map['user_name'] = full_tweet_map['user']['name']
+            tweet_map['location'] = full_tweet_map['user']['location']
+            tweet_map['screen_name'] = full_tweet_map['user']['screen_name']
+            tweet_map['favorites'] = full_tweet_map['user']['favourites_count']
+            # TODO Figure out how to process retweets
+            tweet_map['retweet_count'] = None
         except KeyError as ke:
             log.warning('Could not map tweet: '.format(ke))
         return tweet_map

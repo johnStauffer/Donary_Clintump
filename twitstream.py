@@ -57,7 +57,7 @@ class TwitterApiService(object):
                 """ Filter stream with list of keys"""
                 self.stream.filter(track=filter_keys)
             except Exception as inst:
-                print("error in stream")
+                print("error in stream: {}".format(inst))
                 return None
 
         thread = Thread(target=my_stream, args=(filter_keys,))
