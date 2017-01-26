@@ -1,10 +1,11 @@
 from secrets import DB_HOST, DB_PORT, DB_USER, DB_PW
-import cymysql
+import pymysql
+import datetime
 
 
 class DataConnector(object):
     def __get_connection(self):
-        conn = cymysql.connect(
+        conn = pymysql.connect(
             host=DB_HOST,
             port=DB_PORT,
             user=DB_USER,
@@ -21,6 +22,7 @@ class DataConnector(object):
             cursor = connection.cursor()
         return cursor
 
+
 class TwitterDataAccessor(object):
     def __init__(self):
         self.dc = DataConnector()
@@ -35,11 +37,19 @@ class TwitterDataAccessor(object):
                             screen_name,
                             user_location):
         proc_name = 'dc_twitter.insertTweetAndUser'
+        dt = datetime.datetime.strftime(submit_datetime, '%Y-%m-%d %H:%M:%S')
+        print(dt)
         tweet_args = [text, submit_datetime, user_id, tweet_favorites, retweets, user_name, screen_name, user_location]
+        cursor = self.dc.get_cursor()
         try:
-            cursor = self.dc.get_cursor()
             rs = cursor.callproc(procname=proc_name, args=tweet_args)
         except Exception as inst:
             print(inst)
+            cursor.close()
+            conn = cursor.connection
+            conn.close()
+        finally:
+            cursor.close()
+            conn = cursor.connection
+            conn.close()
         return rs;
-

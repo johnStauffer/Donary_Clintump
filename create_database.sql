@@ -9,7 +9,7 @@ USE dc_twitter;
 
 -- Table Creation
 CREATE TABLE twitter_user (
-	user_id int NOT NULL UNIQUE, 
+	user_id bigint NOT NULL UNIQUE, 
     user_name varchar(30), 
     screen_name varchar(30),
     location varchar(140),
@@ -17,10 +17,10 @@ CREATE TABLE twitter_user (
 	); 
 
 CREATE TABLE tweets (
-	tweet_id int NOT NULL AUTO_INCREMENT, 
+	tweet_id bigint NOT NULL AUTO_INCREMENT, 
     tweet_text varchar(140),
     submit_datetime datetime, 
-    user_id int NOT NULL,
+    user_id bigint NOT NULL,
     favorites int,
     retweets int,
     PRIMARY KEY (tweet_id),
@@ -35,7 +35,7 @@ USE dc_twitter//
 CREATE DEFINER='python'@'localhost' PROCEDURE insertTweetAndUser(
 		tweetText varchar(140), 
 		submitDatetime datetime, 
-		userId int, 
+		userId bigint, 
 		tweetFavorites int, 
 		tweetRetweets int,
 		userName varchar(30), 
