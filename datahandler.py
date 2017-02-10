@@ -41,15 +41,11 @@ class TwitterDataAccessor(object):
         print(dt)
         tweet_args = [text, submit_datetime, user_id, tweet_favorites, retweets, user_name, screen_name, user_location]
         cursor = self.dc.get_cursor()
+        rs = None
         try:
             rs = cursor.callproc(procname=proc_name, args=tweet_args)
         except Exception as inst:
             print(inst)
-            cursor.close()
-            conn = cursor.connection
-            conn.close()
         finally:
             cursor.close()
-            conn = cursor.connection
-            conn.close()
         return rs;
