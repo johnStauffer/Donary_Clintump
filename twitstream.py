@@ -1,6 +1,8 @@
 import secrets
 from threading import Thread
 from tweepy import StreamListener, OAuthHandler, Stream
+import twitterdao
+
 
 # This is list of words that will filter the twitter stream
 
@@ -13,6 +15,7 @@ twitter_data_store = open(twitter_data_path, 'a+')
 class StdOutListener(StreamListener):
     def __init__(self):
         self.count = 0
+        self.dao = twitterdao.TwitterDao()
 
     def on_data(self, data):
         # Write data to file

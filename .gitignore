@@ -3,5 +3,6 @@
 *.txt
 *.log*
 *.pyc
+*.sqlite
 .DS_Store
 secrets.py

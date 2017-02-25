@@ -1,5 +1,5 @@
 --  Drop database if it already exists
-DROP DATABASE dc_twitter; 
+DROP DATABASE  IF EXISTS dc_twitter;
 
 -- Create Database 
 CREATE DATABASE dc_twitter; 
