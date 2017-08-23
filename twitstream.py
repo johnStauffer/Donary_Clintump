@@ -1,8 +1,8 @@
 import secrets
 from threading import Thread
 from tweepy import StreamListener, OAuthHandler, Stream
-import twitterdao
-
+from tweetservice import TweetService
+from scrape import TweetScraperService
 
 # This is list of words that will filter the twitter stream
 
@@ -15,12 +15,18 @@ twitter_data_store = open(twitter_data_path, 'a+')
 class StdOutListener(StreamListener):
     def __init__(self):
         self.count = 0
-        self.dao = twitterdao.TwitterDao()
+        self.tweet_service = TweetService()
 
     def on_data(self, data):
         # Write data to file
-        twitter_data_store.write(data)
-        print(data)
+
+        tweet = TweetScraperService.deserialize_tweet(data)
+        user = TweetScraperService.deserialize_user(data)
+
+        print(user.user_id, tweet.text)
+
+        self.tweet_service.create_user(user)
+        self.tweet_service.create_tweet(tweet)
         return True
 
     def on_error(self, status):
@@ -45,20 +51,20 @@ class TwitterApiService(object):
     def threaded_stream(self, filter_keys):
         """ Stream twitter api and filter by list of keys
 
-        :param filter_keys:
-        :return:
+        :param filter_keys: Only get tweets that include text from this list of keys
+        :return: thread
         """
 
-        def my_stream(filter_keys):
+        def my_stream(filter_params):
             """
-            :param filter_keys: list of keys to filter tweets by
+            :param filter_params: list of keys to filter tweets by
             :return:
             """
             try:
                 """ Stream tweets to listener """
                 self.stream = Stream(self.auth, self.listener)
                 """ Filter stream with list of keys"""
-                self.stream.filter(track=filter_keys)
+                self.stream.filter(track=filter_params)
             except Exception as inst:
                 print("error in stream: {}".format(inst))
                 return None

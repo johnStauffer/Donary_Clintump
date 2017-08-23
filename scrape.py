@@ -1,16 +1,11 @@
 import json
 import datetime as dt
 import logging as log
-import dbconnection
 from tweet import Tweet
 from twitteruser import TwitterUser
-from twitterdao import TwitterDao
 
 
 class TweetScraperService(object):
-    def __init__(self):
-        self.twitterdao = TwitterDao()
-
     def scrape_file(self, file_path):
         """deserialize file of json tweets and return list<map> with relevant fields
 
@@ -28,60 +23,76 @@ class TweetScraperService(object):
         tweet_list = self.scrape_tweet_lines(file_lines)
         return tweet_list
 
-    def scrape_tweet_lines(self, tweet_lines):
+    def scrape_tweet_lines(self, raw_tweet_lines):
 
         """ Iterate through lines of tweet json and return list of tweet maps
 
-        :param tweet_lines: list of lines from tweets file in json format
+        :param raw_tweet_lines: list of lines from tweets file in json format
         :return list of tweets mapped for relevant fields :
         """
         error_count = 0
         """list to collect tweets in"""
         tweets_map_list = []
         """strip data from each tweet in file """
-        for line in tweet_lines:
-            """deserialize json to python tuple"""
-            tweet = json.loads(line)
+        for line in raw_tweet_lines:
             """strip relevant fields and make map"""
-            mapped_tweet = self.map_tweet(tweet)
-            # tweets_map_list.append(mapped_tweet)
-            self.twitterdao.create_tweet(mapped_tweet['tweet'], mapped_tweet['user'])
+            mapped_tweet = self.map_tweet_user(line)
+            tweets_map_list.append(mapped_tweet)
         return tweets_map_list
 
-    def map_tweet(self, full_tweet_map):
+    @staticmethod
+    def deserialize_tweet(raw_tweet):
+        """
+        :param raw_tweet:
+        :return Tweet:
+
+        """
+        tweet = Tweet()
+        full_tweet = json.loads(raw_tweet)
+        datetime = dt.datetime.strptime(full_tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
+
+        try:
+            """map relevant fields to object"""
+            tweet.text = full_tweet['text']
+            tweet.create_datetime = datetime
+            tweet.favorites = full_tweet['user']['favourites_count']
+            tweet.retweets = full_tweet['retweet_count']
+            tweet.in_reply_to_status_id = full_tweet['in_reply_to_status_id']
+            tweet.in_reply_to_user_id = full_tweet['in_reply_to_user_id']
+            tweet.user_id = full_tweet['user']['id']
+        except KeyError as ke:
+            log.warning('Could not map tweet: '.format(ke))
+        return tweet
+
+    @staticmethod
+    def deserialize_user(raw_tweet):
+        """
+        :param raw_tweet:
+        :return TwitterUser:
+        """
+        user = TwitterUser()
+        full_tweet = json.loads(raw_tweet)
+        try:
+            user.user_id = full_tweet['user']['id']
+            user.user_name = full_tweet['user']['name']
+            user.screen_name = full_tweet['user']['screen_name']
+            user.location = full_tweet['user']['location']
+            user.followers = full_tweet['user']['followers_count']
+        except KeyError as ke:
+            log.warning('Could not map user: '.format(ke))
+        return user
+
+    def map_tweet_user(self, full_tweet):
         """process a tweet tuple and map relevant fields
 
         :rtype namedtuple{Tweet, TwitterUser}
-        :param full_tweet_map: full tuple loaded from json of tweet
-        :return: map of relevant tweet fields
+        :param full_tweet: tweet as text
+        :return: map of a Tweet and TwitterUser
         """
-        tweet = Tweet()
-        user = TwitterUser()
-        full_tweet = {}
-        """turn string into datetime"""
-        datetime = dt.datetime.strptime(full_tweet_map['created_at'], '%a %b %d %H:%M:%S %z %Y')
-        try:
-            """map relevant fields to object"""
-            tweet.text = full_tweet_map['text']
-            tweet.create_datetime = datetime
-            tweet.favorites = full_tweet_map['user']['favourites_count']
-            tweet.retweets = full_tweet_map['retweet_count']
-            tweet.in_reply_to_status_id = full_tweet_map['in_reply_to_status_id']
-            tweet.in_reply_to_user_id = full_tweet_map['in_reply_to_user_id']
-
-            tweet.user_id = full_tweet_map['user']['id']
-            user.user_id = full_tweet_map['user']['id']
-
-            user.user_name = full_tweet_map['user']['name']
-            user.screen_name = full_tweet_map['user']['screen_name']
-            user.location = full_tweet_map['user']['location']
-            user.followers = full_tweet_map['user']['followers_count']
-
-            full_tweet['tweet'] = tweet
-            full_tweet['user'] = user
-        except KeyError as ke:
-            log.warning('Could not map tweet: '.format(ke))
-        return full_tweet
+        tweet_user_map = {}
+        tweet_user_map['tweet'] = self.deserialize_tweet(full_tweet)
+        tweet_user_map['user'] = self.deserialize_user(full_tweet)
+        return tweet_user_map
 
     def __open_file(self, file_path):
         """ Open a file given a file path and return lines in file as a list

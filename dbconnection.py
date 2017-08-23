@@ -45,14 +45,14 @@ class DbInitializer(object):
     sqlite_file = 'tweet_db.sqlite'
 
     # Table for tweets
-    tweet_table_name = 'tweet'
-    tweet_table_sql = 'CREATE TABLE tweet(tweet_id integer primary key autoincrement, twitter_reference bigint, ' \
+    tweet_table_name = 'tweets'
+    tweet_table_sql = 'CREATE TABLE tweets(tweet_id integer primary key autoincrement, twitter_reference bigint, ' \
                       'reply_status_id bigint, reply_user_id bigint, tweet_text varchar(140), submit_datetime datetime, ' \
                       'user_id bigint NOT NULL, favorites int, retweets int, ' \
                       'FOREIGN KEY (user_id) REFERENCES twitter_user(user_id));'
     # Table for users
-    user_table_name = 'user'
-    user_table_sql = 'CREATE TABLE twitter_user (user_id bigint NOT NULL UNIQUE, user_name varchar(30), ' \
+    user_table_name = 'users'
+    user_table_sql = 'CREATE TABLE twitter_users (user_id bigint NOT NULL UNIQUE, user_name varchar(30), ' \
                      'screen_name varchar(30), location varchar(255), followers int, PRIMARY KEY (user_id));'
 
     drop_tweets_sql = 'DROP TABLE IF EXISTS tweet; '
@@ -70,4 +70,7 @@ class DbInitializer(object):
 
 if __name__ == '__main__':
     initializer = DbInitializer()
-    initializer.setup_tables()
+    try:
+        initializer.setup_tables()
+    except:
+        print("Tables have already been initialized")

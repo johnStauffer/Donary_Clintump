@@ -9,7 +9,7 @@ class TwitterDao:
         self.connector = dbconnection.SqliteConnector()
         pass
 
-    def create_tweet(self, tweet, twitter_user):
+    def create_tweet(self, tweet):
         """
         Persist a tweet to the sqlite database
 
@@ -17,32 +17,23 @@ class TwitterDao:
         :param TwitterUser twitter_user:
         :return:
         """
-        insert_tweet_query = 'INSERT INTO tweet(twitter_reference, reply_status_id, reply_user_id, tweet_text, ' \
+        insert_tweet_query = 'INSERT INTO tweets(twitter_reference, reply_status_id, reply_user_id, tweet_text, ' \
                              'submit_datetime, user_id, favorites, retweets) ' \
-                             'VALUES ({ref}, {rsid}, {ruid}, "{tt}",  {dt},  {uid}, {fv}, {rt});' \
-            .format(ref=tweet.user_id,
-                    rsid=self.none_to_null(tweet.in_reply_to_status_id),
-                    ruid=self.none_to_null(tweet.in_reply_to_user_id),
-                    tt=tweet.text,
-                    uid=tweet.user_id,
-                    dt=tweet.create_datetime,
-                    fv=tweet.favorites,
-                    rt=tweet.retweets)
-
-        insert_user_query = 'INSERT INTO twitter_user (user_id, user_name, screen_name, location, followers) ' \
-                            'VALUES ({id}, "{un}", "{sn}", "{loc}", {fol})' \
-                            .format(id=twitter_user.user_id, un=twitter_user.user_name, sn=twitter_user.screen_name,
-                                    loc=twitter_user.location, fol=twitter_user.followers)
-
-        commit_sql = 'commit;'
+                             'VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
 
         cursor = self.connector.get_cursor()
         connection = self.connector.conn
 
         try:
-            cursor.execute(insert_user_query)
+            cursor.execute(insert_tweet_query, (tweet.user_id,
+                                                tweet.in_reply_to_status_id,
+                                                tweet.in_reply_to_user_id,
+                                                tweet.text,
+                                                tweet.user_id,
+                                                tweet.create_datetime,
+                                                tweet.favorites,
+                                                tweet.retweets))
             connection.commit()
-            # cursor.execute(insert_tweet_query)
             connection.close()
         except sqlite3.OperationalError as oe:
             print("Error inserting tweet {}, {}".format(type(oe), oe))
@@ -52,8 +43,35 @@ class TwitterDao:
         except AttributeError as ae:
             print("cursor not available")
 
+    def create_user(self, user):
+        """
+
+        :param User user:
+        :return:
+        """
+
+        insert_user_query = 'INSERT INTO twitter_users (user_id, user_name, screen_name, location, followers) ' \
+                            'VALUES (?, ?, ?, ?, ?)'
+        cursor = self.connector.get_cursor()
+        connection = self.connector.conn
+        try:
+            cursor.execute(insert_user_query, (user.user_id,
+                                               user.user_name,
+                                               user.screen_name,
+                                               user.location,
+                                               user.followers))
+            connection.commit()
+            connection.close()
+        except sqlite3.OperationalError as oe:
+            print("Error inserting tweet {}, {}".format(type(oe), oe))
+            cursor.close()
+        except sqlite3.IntegrityError as ie:
+            print("Integrity error {}".format(user.user_id))
+        except AttributeError as ae:
+            print("cursor not available")
+
     def none_to_null(self, object):
         if object == None:
             return 'null'
-        else: return object
-
+        else:
+            return object
