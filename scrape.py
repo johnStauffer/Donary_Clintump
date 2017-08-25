@@ -49,19 +49,21 @@ class TweetScraperService(object):
         """
         tweet = Tweet()
         full_tweet = json.loads(raw_tweet)
-        datetime = dt.datetime.strptime(full_tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
 
         try:
             """map relevant fields to object"""
             tweet.text = full_tweet['text']
-            tweet.create_datetime = datetime
             tweet.favorites = full_tweet['user']['favourites_count']
             tweet.retweets = full_tweet['retweet_count']
             tweet.in_reply_to_status_id = full_tweet['in_reply_to_status_id']
             tweet.in_reply_to_user_id = full_tweet['in_reply_to_user_id']
             tweet.user_id = full_tweet['user']['id']
+            datetime = dt.datetime.strptime(full_tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
+            tweet.create_datetime = datetime
         except KeyError as ke:
             log.warning('Could not map tweet: '.format(ke))
+        except Exception as inst:
+            print(inst)
         return tweet
 
     @staticmethod

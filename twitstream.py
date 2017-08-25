@@ -19,7 +19,6 @@ class StdOutListener(StreamListener):
 
     def on_data(self, data):
         # Write data to file
-
         tweet = TweetScraperService.deserialize_tweet(data)
         user = TweetScraperService.deserialize_user(data)
 
@@ -75,7 +74,9 @@ class TwitterApiService(object):
 
 
 if __name__ == '__main__':
-    filter_keys = ['#imwithher', 'hillary2016', 'trump2016', '#votetrump', '#feelthebern']
+    filter_keys = ['#imwithher', 'hillary2016', 'trump2016', '#votetrump', '#feelthebern' '#maga', '#stillwithher',
+                   '@HillaryClinton', '@realDonaldTrump', '#Hillary', '#optTrump', '@potus', '#pence', '@gop',
+                   ]
     apiService = TwitterApiService()
     thread = apiService.threaded_stream(filter_keys)
     thread._stop()

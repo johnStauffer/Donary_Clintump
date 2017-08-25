@@ -29,8 +29,8 @@ class TwitterDao:
                                                 tweet.in_reply_to_status_id,
                                                 tweet.in_reply_to_user_id,
                                                 tweet.text,
-                                                tweet.user_id,
                                                 tweet.create_datetime,
+                                                tweet.user_id,
                                                 tweet.favorites,
                                                 tweet.retweets))
             connection.commit()
@@ -39,7 +39,7 @@ class TwitterDao:
             print("Error inserting tweet {}, {}".format(type(oe), oe))
             cursor.close()
         except sqlite3.IntegrityError as ie:
-            print("Integrity error {}".format(twitter_user.user_id))
+            print("Integrity error {}".format(tweet.user_id))
         except AttributeError as ae:
             print("cursor not available")
 
