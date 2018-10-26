@@ -35,11 +35,12 @@ class TwitterDao:
                                                 tweet.retweets))
             connection.commit()
             connection.close()
+        except sqlite3.IntegrityError as ie:
+            # TODO this gets thrown a lot (any time a user is already recorded)... Should probably update user record
+            pass
         except sqlite3.OperationalError as oe:
             print("Error inserting tweet {}, {}".format(type(oe), oe))
             cursor.close()
-        except sqlite3.IntegrityError as ie:
-            print("Integrity error {}".format(tweet.user_id))
         except AttributeError as ae:
             print("cursor not available")
 
@@ -69,6 +70,9 @@ class TwitterDao:
             print("Integrity error {}".format(user.user_id))
         except AttributeError as ae:
             print("cursor not available")
+
+    # def create_hashtag(self, hashtag):
+
 
     def none_to_null(self, object):
         if object == None:

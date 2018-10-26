@@ -1,5 +1,4 @@
 from twitterdao import TwitterDao
-from scrape import TweetScraperService
 
 class TweetService(object):
     def __init__(self):
@@ -10,3 +9,6 @@ class TweetService(object):
 
     def create_user(self, user):
         return self.dao.create_user(user)
+
+    def create_hashtag(self, hashtag):
+        return

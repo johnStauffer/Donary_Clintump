@@ -55,8 +55,13 @@ class DbInitializer(object):
     user_table_sql = 'CREATE TABLE twitter_users (user_id bigint NOT NULL UNIQUE, user_name varchar(30), ' \
                      'screen_name varchar(30), location varchar(255), followers int, PRIMARY KEY (user_id));'
 
+    hashtag_table_name = 'hashtags'
+    hashtag_table_sql = 'CREATE TABLE hashtags (hashtag_id integer primary key autoincrement, text varchar(40), ' \
+                        'user_id bigint'
+
     drop_tweets_sql = 'DROP TABLE IF EXISTS tweet; '
     drop_users_sql = 'DROP TABLE IF EXISTS twitter_user;'
+    drop_hashtags_sql = 'DROP TABLE IF EXISTS hashtags'
 
     def __init__(self):
         self.connector = SqliteConnector()
